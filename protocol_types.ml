@@ -1,5 +1,5 @@
 type server = <
-  name : string ;
+  save : string -> Key.t ;
 >
 
 type request = server -> SocketStream.write -> unit

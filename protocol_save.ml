@@ -16,8 +16,8 @@ let recv r =
 module Server = struct
 
   let handle ~id ~data ~length s w = 
-    Log.(out AUDIT "Save : %s (%d bytes)" (Key.to_hex_short id) length) ;
-    w # key id
+    Log.(out AUDIT "Save : %s (%d bytes)" (Key.to_hex_short id) length) ;   
+    w # key (s # save data) 
       
   let parse r =
     let id     = r # key in

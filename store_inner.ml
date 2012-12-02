@@ -19,10 +19,9 @@ let find store key =
 let save store key callback = 
   let filename = filename store key in
   let dirname  = Filename.dirname filename in  
-  if not (Sys.is_directory (Filename.dirname dirname)) then
-    Unix.mkdir (Filename.dirname dirname) 0o700 ;
-  if not (Sys.is_directory dirname) then
-    Unix.mkdir dirname 0o700 ;
+  let dirname' = Filename.dirname dirname in 
+  (try ignore (Sys.is_directory dirname') with _ -> Unix.mkdir dirname' 0o700) ;
+  (try ignore (Sys.is_directory dirname ) with _ -> Unix.mkdir dirname  0o700) ;
   if not (Sys.file_exists filename) then 
     let chan = open_out_bin filename in 
     ( try callback chan ; close_out chan with exn -> close_out chan ; raise exn )

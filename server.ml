@@ -2,8 +2,15 @@ open Store
 open Encode7bit
 open SocketStream
 
+let store = "store"
+
 let server = object
-  method name = "SERVER"
+
+  method save data = 
+    let key = Key.of_sha1 (Sha1.string data) in 
+    Store.save store key data ;
+    key 
+
 end
 
 let () = Listener.start ~port:4567 ~max:10 (fun _ read write -> 
