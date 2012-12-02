@@ -9,7 +9,7 @@ let writelock store key =
   Mtx.use mutex (lazy (
     try Hashtbl.find locks (store,key) 
     with Not_found -> 
-      let inner = Mtx.make ("store:"^Key.short key) in
+      let inner = Mtx.make ("store:"^Key.to_hex_short key) in
       Hashtbl.add locks (store,key) inner ;
       inner
   ))

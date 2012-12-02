@@ -1,7 +1,7 @@
 type store = string
 
 let filename store key = 
-  let hex = Sha1.to_hex key in 
+  let hex = Key.to_hex key in 
   let prefix = String.sub hex 0 2 and suffix = String.sub hex 2 38 in
   Filename.concat store (Filename.concat prefix suffix)
 
