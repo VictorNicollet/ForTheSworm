@@ -35,20 +35,20 @@ class write socket = object (self)
 
   method char c = 
     let s = String.make 1 c in 
-    let _ = Unix.send socket s 0 1 [] in
+    let (_ : int) = Unix.send socket s 0 1 [] in
     () 
 
   method int i = 
     let s = Encode7bit.to_string i in
-    let _ = Unix.send socket s 0 (String.length s) [] in
+    let (_ : int) = Unix.send socket s 0 (String.length s) [] in
     () 
 
   method string s = 
-    let _ = Unix.send socket s 0 (String.length s) [] in
+    let (_ : int) = Unix.send socket s 0 (String.length s) [] in
     () 
 
   method key k = 
-    let _ = Unix.send socket (Key.to_bytes k) 0 Key.bytes [] in
+    let (_ : int) = Unix.send socket (Key.to_bytes k) 0 Key.bytes [] in
     () 
 
 end
