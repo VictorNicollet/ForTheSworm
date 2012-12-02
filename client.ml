@@ -20,10 +20,7 @@ let connect ~port =
   (* Upload some data *)
   for i = 1 to 1000 do 
     Protocol.Save.send ~data:data.(i-1) write ;
-    let id = Protocol.Save.recv read in
-    () 
-    (* Printf.printf "Saved #%d : %s" i (Key.to_hex_short id) ; *)
-    (* print_newline () *)
+    ignore (Protocol.Save.recv read)
   done ;
 
   let end_t = Unix.gettimeofday () in
