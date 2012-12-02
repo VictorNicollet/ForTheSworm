@@ -1,7 +1,7 @@
 open Encode7bit
 
 let data = Array.init 1000 (fun i ->
-  String.create 4092 ^ Printf.sprintf "%04d" i
+  String.create 4088 ^ Printf.sprintf "%04d" i ^ Printf.sprintf "%04x" (Unix.getpid ()) 
 ) 
 
 let connect ~port = 
@@ -21,14 +21,15 @@ let connect ~port =
   for i = 1 to 1000 do 
     Protocol.Save.send ~data:data.(i-1) write ;
     let id = Protocol.Save.recv read in
-    Printf.printf "Saved #%d : %s" i (Key.to_hex_short id) ;
-    print_newline () 
+    () 
+    (* Printf.printf "Saved #%d : %s" i (Key.to_hex_short id) ; *)
+    (* print_newline () *)
   done ;
 
   let end_t = Unix.gettimeofday () in
   let delta = end_t -. start_t in
 
-  Printf.printf "Time : %fs, Read : %f KB/s, Write : %f KB/s"
+  Printf.printf "Time : %fs, Read : %f KB/s, Write : %f KB/s\n"
     delta 
     (float_of_int (read # count) /. 1024. /. delta) 
     (float_of_int (write # count) /. 1024. /. delta) ;
