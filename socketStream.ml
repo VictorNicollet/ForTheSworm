@@ -28,7 +28,7 @@ class read socket = object (self)
 	  get (read + n) (length - n)
 	end
     in
-    get 0 length 
+    get 0 length
 
   method key = 
     Key.of_bytes (self # string Key.bytes)
@@ -39,13 +39,20 @@ class write socket = object (self)
 
   val socket = socket
 
+  val mutable closed = false
+  method closed = closed
+
   val mutable count = 0
   method count = count
 
   method string s =
-    let n = Unix.send socket s 0 (String.length s) [] in
-    count <- count + n
-
+    if not closed then 
+      try 
+	let n = Unix.send socket s 0 (String.length s) [] in
+	count <- count + n
+      with _ -> 
+	closed <- true
+	
   method char c =
     self # string (String.make 1 c)
 
@@ -54,6 +61,9 @@ class write socket = object (self)
 
   method key k = 
     self # string (Key.to_bytes k)
+
+  val lock = Mtx.make "writer"
+  method lock = lock 
 
 end
 

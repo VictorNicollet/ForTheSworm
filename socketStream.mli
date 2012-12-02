@@ -3,11 +3,11 @@ exception EOT
 type socket = Unix.file_descr
 
 class read : socket -> object 
-  method char   : char
-  method int    : int
-  method string : int -> string
-  method key    : Key.t
-  method count  : int
+  method char    : char
+  method int     : int
+  method string  : int -> string
+  method key     :  Key.t
+  method count   : int
 end
 
 class write : socket -> object
@@ -16,6 +16,8 @@ class write : socket -> object
   method string : string -> unit
   method key    : Key.t -> unit
   method count  : int
+  method lock   : Mtx.t
+  method closed : bool
 end
 
 class stream : socket -> object
