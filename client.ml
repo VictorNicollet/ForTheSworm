@@ -20,8 +20,15 @@ let connect ~port =
   Printf.printf "Version: %d\n" version ; 
 
   (* Upload some data *)
+  let queue = Queue.create () in
   for i = 1 to 1000 do 
-    ignore (Protocol.Save.send ~data:data.(i-1) kernel)
+    Queue.push (Protocol.Save.send ~data:data.(i-1) kernel) queue
+  done ;
+
+  Printf.printf "Finished pushing at %fs\n" (Unix.gettimeofday () -. start_t) ;
+
+  while not (Queue.is_empty queue) do 
+    ignore (Protocol.Response.get (Queue.pop queue))
   done ;
   
   Protocol.ClientKernel.destroy kernel ;
