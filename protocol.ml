@@ -12,6 +12,5 @@ let endpoints : endpoint list = [
 
 let parseNextRequest r =
   let c = r # char in
-  Log.(out DEBUG "Command : %c" c) ;
   List.assoc c endpoints r
       
