@@ -17,3 +17,8 @@ class write : socket -> object
   method key    : Key.t -> unit
   method count  : int
 end
+
+class stream : socket -> object
+  method read  : read
+  method write : write
+end

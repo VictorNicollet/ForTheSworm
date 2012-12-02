@@ -56,3 +56,10 @@ class write socket = object (self)
     self # string (Key.to_bytes k)
 
 end
+
+class stream socket = object
+  val read = new read socket
+  method read = read
+  val write = new write socket
+  method write = write
+end
