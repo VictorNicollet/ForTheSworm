@@ -1,7 +1,16 @@
-type 'a t = ('a,exn) BatStd.result option ref
+type 'a t = {
+  mutable value : ('a,exn) BatStd.result option ;
+  attempt : unit -> unit
+}
 
-let make () = ref None
+let make attempt = {
+  value = None ;
+  attempt 
+}
 
-let get r = !r
+let get r = 
+  if r.value = None then r.attempt () ;
+  r.value 
 
-let set r a = r := Some a
+let set r a = 
+  r.value <- Some a
