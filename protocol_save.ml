@@ -21,9 +21,7 @@ module Server = struct
       
   let parse r =
     let id     = r # key in
-    Log.(out DEBUG "Save: id = %s" (Key.to_hex id)) ;
     let length = r # int in
-    Log.(out DEBUG "Save: size = %d" length) ;
     let data   = r # string length in
     handle ~id ~length ~data
       
