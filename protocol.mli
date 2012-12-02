@@ -12,3 +12,7 @@ module Handshake : sig
   val recv : SocketStream.read -> int
 end
 
+module Save : sig 
+  val send : data:string -> SocketStream.write -> unit
+  val recv : SocketStream.read -> Key.t
+end
