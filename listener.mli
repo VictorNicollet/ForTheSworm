@@ -1,4 +1,4 @@
-type handler = Unix.sockaddr -> SocketStream.read -> SocketStream.write -> unit
+type handler = Unix.sockaddr -> SocketStream.stream -> unit
 
 val start : port:int -> max:int -> handler -> unit
 

@@ -1,4 +1,4 @@
-type handler = Unix.sockaddr -> SocketStream.read -> SocketStream.write -> unit
+type handler = Unix.sockaddr -> SocketStream.stream -> unit
 
 let numlock = Mtx.make "numthreads"
 let threads = ref 0 
@@ -26,13 +26,12 @@ let start ~port ~max handler =
 
   let accept () = 
     let socket, addr = Unix.accept sock in 
-    let read = new SocketStream.read socket in 
-    let write = new SocketStream.write socket in 
+    let stream = new SocketStream.stream  socket in 
     incr () ;
     let _ = Thread.create begin fun () ->
       Log.(out AUDIT "JOIN %s" (describe addr));
       try 
-	handler addr read write ; 
+	handler addr stream ; 
 	decr () ;
 	Log.(out AUDIT "STOP %s" (describe addr));
       with exn -> 

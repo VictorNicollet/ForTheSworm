@@ -3,6 +3,7 @@ include Protocol_types
 let version = 1
 
 module Response = Protocol_response
+module ClientKernel = Protocol_clientKernel
 
 module Handshake = Protocol_handshake
 module Save = Protocol_save
@@ -12,7 +13,15 @@ let endpoints : endpoint list = [
   Save.endpoint
 ]
 
-let parseNextRequest r =
+let parseNextRequest stream server =
+  let r = stream # read in
+  let w = stream # write in 
+  let i = r # int  in 
   let c = r # char in
-  List.assoc c endpoints r
-      
+  let endpoint = List.assoc c endpoints in
+  endpoint r server begin fun callback -> 
+    Mtx.use (w # lock) (lazy (
+      w # int i ;
+      callback w
+    ))
+  end

@@ -1,5 +1,4 @@
 val endpoint : Protocol_types.endpoint
   
-val send : data:string -> SocketStream.write -> unit
-val recv : SocketStream.read -> Key.t
-
+val send : Protocol_clientKernel.t -> data:string -> Key.t Protocol_response.t
+    

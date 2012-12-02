@@ -13,14 +13,14 @@ let server = object
 
 end
 
-let () = Listener.start ~port:4567 ~max:10 (fun _ read write -> 
+let () = Listener.start ~port:4567 ~max:10 (fun _ stream -> 
   let rec loop () = 
-    let request = Protocol.parseNextRequest read in
-    request server write ;
+    Protocol.parseNextRequest stream server ;
+    if stream # write # closed then raise SocketStream.EOT ;
     loop ()
   in
-  try loop () with SocketStream.EOT -> 
+    try loop () with SocketStream.EOT -> 
     Log.(out AUDIT "Sent : %.3f KB, Received : %.3f KB"
-      (float_of_int (write # count) /. 1024.) 
-      (float_of_int (read  # count) /. 1024.)) 
+      (float_of_int (stream # write # count) /. 1024.) 
+      (float_of_int (stream # read  # count) /. 1024.)) 
 ) 

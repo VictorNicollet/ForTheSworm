@@ -2,6 +2,8 @@ type server = <
   save : string -> Key.t ;
 >
 
-type request = server -> SocketStream.write -> unit
+type responder = SocketStream.write -> unit
 
-type endpoint = char * (SocketStream.read -> request)
+type request = SocketStream.read -> server -> (responder -> unit) -> unit
+
+type endpoint = char * request
