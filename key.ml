@@ -12,7 +12,7 @@ let to_hex t =
   for i = 0 to bytes - 1 do 
     let c = Char.code t.[i] in
     out.[2*i  ] <- hex.[ c lsr  4  ] ;
-    out.[2*i+1] <- hex.[ c land 31 ]
+    out.[2*i+1] <- hex.[ c land 15 ]
   done ;
   out
 
