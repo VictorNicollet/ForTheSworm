@@ -7,8 +7,12 @@ class read socket = object (self)
   val socket = socket
   val buf    = String.create 10
 
+  val mutable count = 0 
+  method count = count
+
   method char = 
     let n = Unix.recv socket buf 0 1 [] in
+    count <- count + n ;
     if n = 1 then buf.[0] else raise EOT
 
   method int = 
@@ -19,8 +23,10 @@ class read socket = object (self)
     let rec get read length = 
       if length = 0 then buf else
 	let n = Unix.recv socket buf read length [] in
-	if n = 0 then raise EOT else
+	if n = 0 then raise EOT else begin
+	  count <- count + n ;
 	  get (read + n) (length - n)
+	end
     in
     get 0 length 
 
@@ -33,22 +39,20 @@ class write socket = object (self)
 
   val socket = socket
 
-  method char c = 
-    let s = String.make 1 c in 
-    let (_ : int) = Unix.send socket s 0 1 [] in
-    () 
+  val mutable count = 0
+  method count = count
 
-  method int i = 
-    let s = Encode7bit.to_string i in
-    let (_ : int) = Unix.send socket s 0 (String.length s) [] in
-    () 
+  method string s =
+    let n = Unix.send socket s 0 (String.length s) [] in
+    count <- count + n
 
-  method string s = 
-    let (_ : int) = Unix.send socket s 0 (String.length s) [] in
-    () 
+  method char c =
+    self # string (String.make 1 c)
+
+  method int i =
+    self # string (Encode7bit.to_string i)
 
   method key k = 
-    let (_ : int) = Unix.send socket (Key.to_bytes k) 0 Key.bytes [] in
-    () 
+    self # string (Key.to_bytes k)
 
 end

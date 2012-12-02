@@ -7,6 +7,7 @@ class read : socket -> object
   method int    : int
   method string : int -> string
   method key    : Key.t
+  method count  : int
 end
 
 class write : socket -> object
@@ -14,4 +15,5 @@ class write : socket -> object
   method int    : int -> unit
   method string : string -> unit
   method key    : Key.t -> unit
+  method count  : int
 end
