@@ -15,14 +15,17 @@ class read socket = object (self)
     Encode7bit.of_charStream (fun r -> r # char) self
     
   method string length = 
-    let out = String.create length in 
+    let buf = String.create length in 
     let rec get read length = 
-      if length = 0 then out else
-	let n = Unix.recv socket out read length [] in
+      if length = 0 then buf else
+	let n = Unix.recv socket buf read length [] in
 	if n = 0 then raise EOT else
 	  get (read + n) (length - n)
     in
     get 0 length 
+
+  method key = 
+    Key.of_bytes (self # string Key.bytes)
 
 end
 
@@ -42,6 +45,10 @@ class write socket = object (self)
 
   method string s = 
     let _ = Unix.send socket s 0 (String.length s) [] in
+    () 
+
+  method key k = 
+    let _ = Unix.send socket (Key.to_bytes k) 0 Key.bytes [] in
     () 
 
 end
