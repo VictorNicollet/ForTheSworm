@@ -42,3 +42,11 @@ let of_channel chan =
     if j land 0x80 <> 0 then extract (i+1) n else n
   in
   extract 0 0 
+
+let of_poll poll = 
+  let rec extract i n = 
+    let j = Char.code (poll ()) in
+    let n = n lor ((j land 0x7F) lsl (i * 7)) in
+    if j land 0x80 <> 0 then extract (i+1) n else n
+  in
+  extract 0 0 
