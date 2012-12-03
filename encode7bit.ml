@@ -43,7 +43,7 @@ let of_channel chan =
   in
   extract 0 0 
 
-let of_poll poll = 
+let of_charStream poll = 
   let rec extract i n = 
     let j = Char.code (poll ()) in
     let n = n lor ((j land 0x7F) lsl (i * 7)) in
