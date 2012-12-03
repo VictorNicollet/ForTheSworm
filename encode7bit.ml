@@ -43,9 +43,9 @@ let of_channel chan =
   in
   extract 0 0 
 
-let of_charStream poll = 
+let of_charStream poll t = 
   let rec extract i n = 
-    let j = Char.code (poll ()) in
+    let j = Char.code (poll t) in
     let n = n lor ((j land 0x7F) lsl (i * 7)) in
     if j land 0x80 <> 0 then extract (i+1) n else n
   in

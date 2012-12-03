@@ -4,4 +4,4 @@ val of_string : string -> int
 val to_channel : out_channel -> int -> unit
 val of_channel : in_channel -> int
 
-val of_charStream : (unit -> char) -> int
+val of_charStream : ('a -> char) -> 'a -> int
