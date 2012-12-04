@@ -25,38 +25,22 @@ let writeunlock store key =
   Mtx.use mutex (lazy (Hashtbl.remove locks (store,key)))
 
 let save store key contents = 
-  let channel = Event.new_channel () in
   let write chan = output_string chan contents in
-  let _ = Thread.create begin fun () -> 
-    let result = Mtx.use (writelock store key) (lazy (
-      try BatStd.Ok (Inner.save store key write)
-      with exn -> BatStd.Bad exn 
-    )) in
+  try 
+    let result =
+      Mtx.use (writelock store key) 
+	(lazy (Inner.save store key write)) 
+    in
     writeunlock store key ;
-    Event.sync (Event.send channel result)
-  end () in
-  Event.receive channel
+    result
+  with exn ->
+    writeunlock store key ;
+    raise exn 
  
 let load store key callback = 
-  let channel = Event.new_channel () in
-  let _ = Thread.create begin fun () ->
-    readblock store key ;
-    let result = 
-      try BatStd.Ok (Inner.load store key callback)
-      with exn -> BatStd.Bad exn 
-    in
-    Event.sync (Event.send channel result)    
-  end () in
-  Event.receive channel
+  readblock store key ;
+  Inner.load store key callback
 
 let find store key = 
-  let channel = Event.new_channel () in
-  let _ = Thread.create begin fun () -> 
-    readblock store key ;
-    let result = 
-      try BatStd.Ok (Inner.find store key)
-      with exn -> BatStd.Bad exn
-    in
-    Event.sync (Event.send channel result) 
-  end () in
-  Event.receive channel
+  readblock store key ;
+  Inner.find store key
