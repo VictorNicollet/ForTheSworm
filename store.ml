@@ -24,11 +24,12 @@ let readblock store key =
 let writeunlock store key = 
   Mtx.use mutex (lazy (Hashtbl.remove locks (store,key)))
 
-let save store key callback = 
+let save store key contents = 
   let channel = Event.new_channel () in
+  let write chan = output_string chan contents in
   let _ = Thread.create begin fun () -> 
     let result = Mtx.use (writelock store key) (lazy (
-      try BatStd.Ok (Inner.save store key callback)
+      try BatStd.Ok (Inner.save store key write)
       with exn -> BatStd.Bad exn 
     )) in
     writeunlock store key ;
