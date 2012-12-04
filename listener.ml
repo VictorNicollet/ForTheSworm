@@ -1,6 +1,6 @@
 type handler = Unix.sockaddr -> SocketStream.read -> SocketStream.write -> unit
 
-let numlock = Mutex.create () 
+let numlock = Mtx.make "numthreads"
 let threads = ref 0 
 let version = ref 0 
 
@@ -21,17 +21,8 @@ let start ~port ~max handler =
   Log.(out AUDIT "... listening on localhost:%d" port) ;
   Unix.(listen sock max) ;
 
-  let incr () = 
-    Mutex.lock numlock ;
-    incr threads ;
-    Mutex.unlock numlock ;
-  in
-
-  let decr () = 
-    Mutex.lock numlock ;
-    decr threads ;
-    Mutex.unlock numlock ; 
-  in    
+  let incr () = Mtx.use numlock (lazy (incr threads)) in
+  let decr () = Mtx.use numlock (lazy (decr threads)) in
 
   let accept () = 
     let socket, addr = Unix.accept sock in 

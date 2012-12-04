@@ -3,43 +3,34 @@ module Inner = Store_inner
 type store = Inner.store
 
 let locks = Hashtbl.create 100
-let mutex = Mutex.create ()
+let mutex = Mtx.make "store"
 
 let writelock store key = 
-  Mutex.lock mutex ;
-  let inner = 
+  Mtx.use mutex (lazy (
     try Hashtbl.find locks (store,key) 
     with Not_found -> 
-      let inner = Mutex.create () in
+      let inner = Mtx.make ("store:"^Key.short key) in
       Hashtbl.add locks (store,key) inner ;
       inner
-  in
-  Mutex.unlock mutex ;
-  Mutex.lock inner 
+  ))
 
 let readblock store key = 
-  Mutex.lock mutex ;
-  try let inner = Hashtbl.find locks (store,key) in
-      Mutex.unlock mutex ;
-      Mutex.lock inner ;
-      Mutex.unlock inner
-  with Not_found ->
-    Mutex.unlock mutex
+  let inner = Mtx.use mutex (lazy (
+    try Some (Hashtbl.find locks (store,key))
+    with Not_found -> None
+  )) in
+  match inner with None -> () | Some mutex -> Mtx.use mutex (lazy ()) 
 
 let writeunlock store key = 
-  Mutex.lock mutex ;
-  (try Mutex.unlock (Hashtbl.find locks (store,key)) with Not_found -> ()) ;
-  Hashtbl.remove locks (store,key) ;
-  Mutex.unlock mutex 
+  Mtx.use mutex (lazy (Hashtbl.remove locks (store,key)))
 
 let save store key callback = 
   let channel = Event.new_channel () in
   let _ = Thread.create begin fun () -> 
-    writelock store key ;
-    let result = 
+    let result = Mtx.use (writelock store key) (lazy (
       try BatStd.Ok (Inner.save store key callback)
       with exn -> BatStd.Bad exn 
-    in 
+    )) in
     writeunlock store key ;
     Event.sync (Event.send channel result)
   end () in
