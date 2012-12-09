@@ -1,4 +1,6 @@
-type store = Store.store
+type store = string
+
+let store s = Filename.concat s "blob"
 
 let save store blob = 
   let key   = Blob.hash blob in 
