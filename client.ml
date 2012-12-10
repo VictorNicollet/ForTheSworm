@@ -12,24 +12,37 @@ let connect ~port =
   let stream = new SocketStream.stream sock in 
   let kernel = Protocol.ClientKernel.make stream in 
 
-  let start_t = Unix.gettimeofday () in
-
   (* Shake hands *)
   let result = Protocol.Handshake.send ~version:Protocol.version kernel in
   let version = Protocol.Response.get result in
   Printf.printf "Version: %d\n" version ; 
 
   (* Upload some data *)
-  let queue = Queue.create () in
+  let start_t = Unix.gettimeofday () in
+  let writequeue = Queue.create () in
   for i = 1 to 1000 do 
-    Queue.push (Protocol.Save.send ~data:data.(i-1) kernel) queue
+    Queue.push (Protocol.Save.send ~data:data.(i-1) kernel) writequeue
   done ;
 
-  Printf.printf "Finished pushing at %fs\n" (Unix.gettimeofday () -. start_t) ;
+  Printf.printf "Write : %fs\n" (Unix.gettimeofday () -. start_t) ;
 
-  while not (Queue.is_empty queue) do 
-    ignore (Protocol.Response.get (Queue.pop queue))
+  (* Read back the written data *)
+  let start2_t = Unix.gettimeofday () in
+  let readqueue = Queue.create () in
+  while not (Queue.is_empty writequeue) do 
+    let key = Protocol.Response.get (Queue.pop writequeue) in
+    Queue.push (Protocol.Load.send ~key kernel) readqueue
   done ;
+
+  let i = ref 0 in
+  let e = ref 0 in
+  while not (Queue.is_empty readqueue) do
+    let read = Protocol.Response.get (Queue.pop readqueue) in
+    if read <> Some data.(!i) then incr e ;
+    incr i 
+  done ;
+
+  Printf.printf "Read : %fs (%d errors)\n" (Unix.gettimeofday () -. start2_t) !e;
   
   Protocol.ClientKernel.destroy kernel ;
 
