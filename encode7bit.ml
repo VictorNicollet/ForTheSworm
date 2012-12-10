@@ -1,3 +1,6 @@
+let rec length i = 
+  if i lsr 7 = 0 then 1 else 1 + length (i lsr 7) 
+
 let to_string i = 
   let n = 
     if i lsr 7 = 0 then 1 else 
@@ -18,14 +21,17 @@ let ok s =
   let n = String.length s in 
   n >= 1 || n <= 5 && (Char.code s.[n-1]) land 0x80 = 0
 
-let of_string s = 
-  assert (ok s) ;
+let of_prefix s =
   let rec extract i n = 
     let j = Char.code s.[i] in
     let n = n lor ((j land 0x7F) lsl (i * 7)) in
     if j land 0x80 <> 0 then extract (i+1) n else n
   in
-  extract 0 0 
+  extract 0 0  
+
+let of_string s = 
+  assert (ok s) ;
+  of_prefix s
 
 let rec to_channel chan i = 
   if i lsr 7 = 0 then
