@@ -11,6 +11,20 @@ let server = object
     Store.save store key data ;
     key 
 
+  method load key = 
+    let reader chan =
+      let size = in_channel_length chan in
+      let data = String.create size in
+      really_input chan data 0 size ;
+      data
+    in
+    try Store.load store key reader
+    with exn -> 
+      Log.(out ERROR "Load %s failed : %S" 
+	     (Key.to_hex_short key)
+	     (Printexc.to_string exn)) ;
+      None
+
 end
 
 let () = Listener.start ~port:4567 ~max:10 (fun _ stream -> 

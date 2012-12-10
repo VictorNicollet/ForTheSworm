@@ -1,5 +1,6 @@
 type server = <
   save : string -> Key.t ;
+  load : Key.t  -> string option ; 
 >
 
 val version : int
