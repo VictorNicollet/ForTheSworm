@@ -21,7 +21,8 @@ let connect ~port =
   let start_t = Unix.gettimeofday () in
   let writequeue = Queue.create () in
   for i = 1 to 1000 do 
-    Queue.push (Protocol.Save.send ~data:data.(i-1) kernel) writequeue
+    let blob = Blob.make data.(i-1) in
+    Queue.push (Protocol.Save.send ~blob kernel) writequeue
   done ;
 
   Printf.printf "Write : %fs\n" (Unix.gettimeofday () -. start_t) ;
@@ -38,6 +39,7 @@ let connect ~port =
   let e = ref 0 in
   while not (Queue.is_empty readqueue) do
     let read = Protocol.Response.get (Queue.pop readqueue) in
+    let read = BatOption.map Blob.data read in 
     if read <> Some data.(!i) then incr e ;
     incr i 
   done ;

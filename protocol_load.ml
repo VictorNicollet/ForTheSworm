@@ -12,7 +12,7 @@ let send kernel ~key =
     ~recv:begin fun r -> 
       let i = r # int in 
       if i = 0 then None else 
-	Some (r # string (i - 1)) 
+	Some (Blob.of_bytes (r # string (i - 1))) 
     end
     
 module Server = struct
@@ -22,8 +22,9 @@ module Server = struct
     ignore (Thread.create begin fun key -> 
       match s # load key with
       | None      -> wf (fun w -> w # int 0)
-      | Some data -> let l = String.length data in
-		     wf (fun w -> w # int (l + 1) ; w # string data) 
+      | Some data -> let l = Blob.bytes data in 
+		     let b = Blob.to_bytes data in
+		     wf (fun w -> w # int (l + 1) ; w # string b) 
     end key) 
       
   let parse r =

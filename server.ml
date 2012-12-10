@@ -7,18 +7,10 @@ let store = "store"
 let server = object
 
   method save data = 
-    let key = Key.of_sha1 (Sha1.string data) in 
-    Store.save store key data ;
-    key 
+    BlobStore.save store data
 
   method load key = 
-    let reader chan =
-      let size = in_channel_length chan in
-      let data = String.create size in
-      really_input chan data 0 size ;
-      data
-    in
-    try Store.load store key reader
+    try BlobStore.load store key 
     with exn -> 
       Log.(out ERROR "Load %s failed : %S" 
 	     (Key.to_hex_short key)

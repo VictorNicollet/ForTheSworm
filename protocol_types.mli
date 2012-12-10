@@ -1,6 +1,6 @@
 type server = <
-  save : string -> Key.t ;
-  load : Key.t  -> string option 
+  save : Blob.t -> Key.t ;
+  load : Key.t  -> Blob.t option 
 >
 
 type responder = SocketStream.write -> unit

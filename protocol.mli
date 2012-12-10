@@ -1,6 +1,6 @@
 type server = <
-  save : string -> Key.t ;
-  load : Key.t  -> string option ; 
+  save : Blob.t -> Key.t ;
+  load : Key.t  -> Blob.t option ; 
 >
 
 val version : int
@@ -23,9 +23,9 @@ module Handshake : sig
 end
 
 module Save : sig 
-  val send : ClientKernel.t -> data:string -> Key.t Response.t
+  val send : ClientKernel.t -> blob:Blob.t -> Key.t Response.t
 end
 
 module Load : sig
-  val send : ClientKernel.t -> key:Key.t -> string option Response.t
+  val send : ClientKernel.t -> key:Key.t -> Blob.t option Response.t
 end
