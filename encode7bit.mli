@@ -1,3 +1,5 @@
+exception BadInput of exn 
+
 val to_string : int -> string
 val of_string : string -> int
 

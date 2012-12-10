@@ -1,3 +1,5 @@
+exception BadInput of exn
+
 let rec length i = 
   if i lsr 7 = 0 then 1 else 1 + length (i lsr 7) 
 
@@ -27,10 +29,10 @@ let of_prefix s =
     let n = n lor ((j land 0x7F) lsl (i * 7)) in
     if j land 0x80 <> 0 then extract (i+1) n else n
   in
-  extract 0 0  
+  try extract 0 0 with exn -> raise (BadInput exn) 
 
 let of_string s = 
-  assert (ok s) ;
+  if not (ok s) then raise (BadInput (Failure "Incorrect input size"));
   of_prefix s
 
 let rec to_channel chan i = 
@@ -47,7 +49,7 @@ let of_channel chan =
     let n = n lor ((j land 0x7F) lsl (i * 7)) in
     if j land 0x80 <> 0 then extract (i+1) n else n
   in
-  extract 0 0 
+  try extract 0 0 with exn -> raise (BadInput exn)
 
 let of_charStream poll t = 
   let rec extract i n = 
@@ -55,4 +57,4 @@ let of_charStream poll t =
     let n = n lor ((j land 0x7F) lsl (i * 7)) in
     if j land 0x80 <> 0 then extract (i+1) n else n
   in
-  extract 0 0 
+  extract 0 0
