@@ -7,10 +7,12 @@ module ClientKernel = Protocol_clientKernel
 
 module Handshake = Protocol_handshake
 module Save = Protocol_save
+module Load = Protocol_load
 
 let endpoints : endpoint list = [
   Handshake.endpoint ;
-  Save.endpoint
+  Save.endpoint ;
+  Load.endpoint
 ]
 
 let parseNextRequest stream server =

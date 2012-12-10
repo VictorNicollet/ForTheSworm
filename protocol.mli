@@ -25,3 +25,7 @@ end
 module Save : sig 
   val send : ClientKernel.t -> data:string -> Key.t Response.t
 end
+
+module Load : sig
+  val send : ClientKernel.t -> key:Key.t -> string option Response.t
+end
