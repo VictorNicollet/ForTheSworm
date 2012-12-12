@@ -1,6 +1,7 @@
 open Store
 open Encode7bit
 open SocketStream
+open Pointer
 
 let store = "store"
 
