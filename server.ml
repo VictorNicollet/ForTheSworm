@@ -4,15 +4,15 @@ open SocketStream
 open Pointer
 
 let store = "store"
-let blobStore = BlobStore.store store
+let blobStore = Blob.Store.define store
 
 let server = object
 
   method save data = 
-    BlobStore.save blobStore data
+    Blob.Store.save blobStore data
 
   method load key = 
-    try BlobStore.load blobStore key 
+    try Blob.Store.load blobStore key 
     with exn -> 
       Log.(out ERROR "Load %s failed : %S" 
 	     (Key.to_hex_short key)

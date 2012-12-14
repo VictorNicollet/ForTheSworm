@@ -19,15 +19,3 @@ val keys : t -> Key.t array
 val data : t -> string
 
 val make : ?keys:Key.t array -> string -> t
-
-module Store : sig
-
-  type store 
-    
-  val define : Store.store -> store
-    
-  val save : store -> t -> Key.t
-  val load : store -> Key.t -> t option
-  val find : store -> Key.t -> bool
-    
-end
