@@ -7,13 +7,13 @@ let blobStore = Blob.Store.define store
 
 let server = object
 
-  method save data = 
+  method save_blob data = 
     Blob.Store.save blobStore data
 
-  method load key = 
+  method load_blob key = 
     try Blob.Store.load blobStore key 
     with exn -> 
-      Log.(out ERROR "Load %s failed : %S" 
+      Log.(out ERROR "Load blob %s failed : %S" 
 	     (Key.to_hex_short key)
 	     (Printexc.to_string exn)) ;
       None

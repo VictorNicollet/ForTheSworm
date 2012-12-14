@@ -1,6 +1,6 @@
 type server = <
-  save : Blob.t -> Key.t ;
-  load : Key.t -> Blob.t option 
+  save_blob : Blob.t -> Key.t ;
+  load_blob : Key.t -> Blob.t option 
 >
 
 type responder = Pipe.write -> unit

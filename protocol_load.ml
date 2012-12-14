@@ -20,7 +20,7 @@ module Server = struct
   let handle ~key s wf = 
     Log.(out AUDIT "Load : %s" (Key.to_hex_short key)) ;   
     ignore (Thread.create begin fun key -> 
-      match s # load key with
+      match s # load_blob key with
       | None      -> wf (fun w -> w # int 0)
       | Some data -> let l = Blob.bytes data in 
 		     let b = Blob.to_bytes data in

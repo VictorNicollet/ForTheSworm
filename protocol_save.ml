@@ -22,7 +22,7 @@ module Server = struct
   let handle ~id ~data ~length s wf = 
     Log.(out AUDIT "Save : %s (%d bytes)" (Key.to_hex_short id) length) ;   
     ignore (Thread.create begin fun data -> 
-      let key = s # save (Blob.of_bytes data) in
+      let key = s # save_blob (Blob.of_bytes data) in
       wf (fun w -> w # key key) 
     end data) 
       
