@@ -4,7 +4,7 @@ type server = <
 >
 
 val version : int
-val parseNextRequest : SocketStream.stream -> server -> unit
+val parseNextRequest : Pipe.readwrite -> server -> unit
 
 module Response : sig
   type 'a t 
@@ -14,7 +14,7 @@ end
 
 module ClientKernel : sig
   type t 
-  val make : SocketStream.stream -> t
+  val make : Pipe.readwrite -> t
   val destroy : t -> unit
 end
 

@@ -67,7 +67,7 @@ class write socket = object (self)
 
 end
 
-class stream socket = object
+class readwrite socket = object
   val read = new read socket
   method read = read
   val write = new write socket

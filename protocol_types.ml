@@ -3,8 +3,8 @@ type server = <
   load : Key.t -> Blob.t option 
 >
 
-type responder = SocketStream.write -> unit
+type responder = Pipe.write -> unit
 
-type request = SocketStream.read -> server -> (responder -> unit) -> unit
+type request = Pipe.read -> server -> (responder -> unit) -> unit
 
 type endpoint = char * request

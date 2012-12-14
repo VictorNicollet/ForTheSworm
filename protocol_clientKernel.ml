@@ -1,17 +1,17 @@
 module Response = Protocol_response
 
 type t = {
-  stream  : SocketStream.stream ;
-  pending : (SocketStream.read option -> unit) PendArray.t ;
+  pipe    :  Pipe.readwrite ;
+  pending : (Pipe.read option -> unit) PendArray.t ;
 }
 
-let make stream = {
-  stream ;
+let make pipe = {
+  pipe ;
   pending = PendArray.make () 
 }
 
 let attempt t () = 
-  let read = t.stream # read in 
+  let read = t.pipe # read in 
   (* TODO : poll for values instead of blocking *)
   let i = read # int in 
   match PendArray.remove t.pending i with 
@@ -22,13 +22,13 @@ let enqueue t ~send ~recv =
   let response = Response.make (attempt t) in
   let i = PendArray.add t.pending begin fun read -> 
     let result =
-      match read with None -> BatStd.Bad SocketStream.EOT | Some read -> 
+      match read with None -> BatStd.Bad Pipe.EOT | Some read -> 
 	try BatStd.Ok (recv read) with exn -> BatStd.Bad exn 
     in 
     Response.set response result
   end in 
-  t.stream # write # int i ;
-  send (t.stream # write) ;
+  t.pipe # write # int i ;
+  send (t.pipe # write) ;
   response
   
 let destroy t =

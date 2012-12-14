@@ -9,8 +9,8 @@ let connect ~port =
   let sock = Unix.(socket PF_INET SOCK_STREAM 0) in
   Unix.(connect sock (ADDR_INET (inet_addr_loopback,port))) ;
 
-  let stream = new SocketStream.stream sock in 
-  let kernel = Protocol.ClientKernel.make stream in 
+  let pipe   = new Pipe.readwrite sock in 
+  let kernel = Protocol.ClientKernel.make pipe in 
 
   (* Shake hands *)
   let result = Protocol.Handshake.send ~version:Protocol.version kernel in
@@ -53,8 +53,8 @@ let connect ~port =
 
   Printf.printf "Time : %fs, Read : %f KB/s, Write : %f KB/s\n"
     delta 
-    (float_of_int (stream # read # count) /. 1024. /. delta) 
-    (float_of_int (stream # write # count) /. 1024. /. delta) ;
+    (float_of_int (pipe # read # count) /. 1024. /. delta) 
+    (float_of_int (pipe # write # count) /. 1024. /. delta) ;
     
   Unix.(shutdown sock SHUTDOWN_ALL) 
 

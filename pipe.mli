@@ -20,7 +20,7 @@ class write : socket -> object
   method closed : bool
 end
 
-class stream : socket -> object
+class readwrite : socket -> object
   method read  : read
   method write : write
 end
