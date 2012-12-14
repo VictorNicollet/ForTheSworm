@@ -1,7 +1,7 @@
 open Protocol_types 
 open Protocol_clientKernel
 
-let keyword = '>'
+let keyword = 'b'
 
 let send kernel ~key = 
   enqueue kernel 

@@ -6,13 +6,13 @@ module Response = Protocol_response
 module ClientKernel = Protocol_clientKernel
 
 module Handshake = Protocol_handshake
-module Save = Protocol_save
-module Load = Protocol_load
+module SaveBlob = Protocol_saveBlob
+module LoadBlob = Protocol_loadBlob
 
 let endpoints : endpoint list = [
   Handshake.endpoint ;
-  Save.endpoint ;
-  Load.endpoint
+  SaveBlob.endpoint ;
+  LoadBlob.endpoint
 ]
 
 let parseNextRequest stream server =

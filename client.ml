@@ -22,7 +22,7 @@ let connect ~port =
   let writequeue = Queue.create () in
   for i = 1 to 1000 do 
     let blob = Blob.make data.(i-1) in
-    Queue.push (Protocol.Save.send ~blob kernel) writequeue
+    Queue.push (Protocol.SaveBlob.send ~blob kernel) writequeue
   done ;
 
   Printf.printf "Write : %fs\n" (Unix.gettimeofday () -. start_t) ;
@@ -32,7 +32,7 @@ let connect ~port =
   let readqueue = Queue.create () in
   while not (Queue.is_empty writequeue) do 
     let key = Protocol.Response.get (Queue.pop writequeue) in
-    Queue.push (Protocol.Load.send ~key kernel) readqueue
+    Queue.push (Protocol.LoadBlob.send ~key kernel) readqueue
   done ;
 
   let i = ref 0 in

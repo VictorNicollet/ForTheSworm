@@ -22,10 +22,10 @@ module Handshake : sig
   val send : ClientKernel.t -> version:int -> int Response.t
 end
 
-module Save : sig 
+module SaveBlob : sig 
   val send : ClientKernel.t -> blob:Blob.t -> Key.t Response.t
 end
 
-module Load : sig
+module LoadBlob : sig
   val send : ClientKernel.t -> key:Key.t -> Blob.t option Response.t
 end

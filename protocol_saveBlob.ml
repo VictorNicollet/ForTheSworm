@@ -1,7 +1,7 @@
 open Protocol_types 
 open Protocol_clientKernel
 
-let key = '<'
+let key = 'B'
 
 let send kernel ~blob = 
   enqueue kernel 
