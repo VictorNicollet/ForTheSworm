@@ -28,10 +28,11 @@ let bytes_of_list list =
   let length s = Encode7bit.to_string (String.length s + 1) in
   let concat = 
     String.concat ""
-      (List.concat 
-	 (List.map (function 
-	 | `K k -> [ zero ; Key.to_bytes k ]
-	 | `S s -> [ length s ; s ]) list))
+      (Encode7bit.to_string (List.length list) :: 
+	 (List.concat 
+	    (List.map (function 
+	      | `K k -> [ zero ; Key.to_bytes k ]
+	      | `S s -> [ length s ; s ]) list)))
   in
   concat
 	 
@@ -57,20 +58,25 @@ let list_of_bytes bytes =
       let s = String.sub bytes !c len in 
       c := !c + len ; s
     in
-    let rec build () = 
-      let l = Encode7bit.of_charStream getchar () in
-      let h = 
-	if l = 0 
-	then `K (Key.of_bytes (getstr Key.bytes))
-	else `S (getstr (l - 1))
-      in
-      h :: build () 
+    let rec build n = 
+      if n = 0 then [] else 
+	let l = Encode7bit.of_charStream getchar () in
+	let h = 
+	  if l = 0 
+	  then `K (Key.of_bytes (getstr Key.bytes))
+	  else `S (getstr (l - 1))
+	in
+	h :: build (n-1) 
     in
-    build () 
+    let list = build (Encode7bit.of_charStream getchar ()) in
+    list, !c 
   with exn -> raise (ParseError exn)
 
 let of_bytes bytes = 
-  let list  = list_of_bytes bytes in 
-  let hash  = lazy (Key.of_sha1 (Sha1.string bytes)) in
-  let bytes = Lazy.lazy_from_val bytes in 
+  let list, n = list_of_bytes bytes in 
+  let bytes   = 
+    if String.length bytes <> n then lazy (String.sub bytes 0 n) 
+    else Lazy.lazy_from_val bytes 
+  in 
+  let hash    = lazy (Key.of_sha1 (Sha1.string (Lazy.force bytes))) in
   { list ; hash ; bytes }

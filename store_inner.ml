@@ -1,12 +1,13 @@
 type store = string
 
-let filename store key = 
+let filename ?(meta=false) store key = 
   let hex = Key.to_hex key in 
   let prefix = String.sub hex 0 2 and suffix = String.sub hex 2 38 in
-  Filename.concat store (Filename.concat prefix suffix)
+  let file = Filename.concat store (Filename.concat prefix suffix) in
+  if meta then file ^ ".meta" else file 
 
-let load store key callback = 
-  match (try Some (open_in_bin (filename store key)) with _ -> None) with 
+let load store key ?meta callback = 
+  match (try Some (open_in_bin (filename ?meta store key)) with _ -> None) with 
     None -> None | Some chan -> 
       try let result = callback chan in 
 	  close_in chan ;
@@ -16,8 +17,8 @@ let load store key callback =
 let find store key = 
   None <> load store key ignore
 
-let save store key callback = 
-  let filename = filename store key in
+let save store key ?meta callback = 
+  let filename = filename ?meta store key in
   let dirname  = Filename.dirname filename in  
   let dirname' = Filename.dirname dirname in 
   (try ignore (Sys.is_directory dirname') with _ -> Unix.mkdir dirname' 0o700) ;
@@ -26,4 +27,7 @@ let save store key callback =
     let chan = open_out_bin filename in 
     ( try callback chan ; close_out chan with exn -> close_out chan ; raise exn )
       
-
+let delete store key = 
+  let filename = filename store key in 
+  if Sys.file_exists filename then 
+    Sys.remove filename 

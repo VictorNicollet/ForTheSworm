@@ -7,6 +7,11 @@ let of_sha1 = Sha1.to_bin
 let bytes = 20
 let hex = "0123456789ABCDEF"
 
+let of_channel chan = 
+  let s = String.create bytes in
+  really_input chan s 0 bytes ;
+  s 
+
 let to_hex t = 
   let out = String.create (bytes * 2) in
   for i = 0 to bytes - 1 do 
