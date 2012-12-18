@@ -17,6 +17,14 @@ type 'a t = 'a tree option
 let ispow2 x = 
   0 = x land (x - 1)
 
+let rec lastseq = function 
+  | Leaf l -> l.seq
+  | Node n -> lastseq n.right
+  | Pass n -> lastseq n.right
+
+(* Last should return the same as lastseq for 
+   root trees (and should not be called on subtrees). 
+*)
 let last = function 
   | None -> -1 
   | Some (Leaf l) -> l.seq
@@ -107,6 +115,64 @@ let range tree b e =
     let e = min e (size tree) in
     aux b e [] [] tree
 
-	
+exception ParseError
+
+let to_blob = function 
+  | None -> Blob.make ""
+  | Some tree ->
+
+    (* Extract all keys from the tree. Duplicates might
+       happen, so use a hashtable to create a key -> int 
+       mapping that will be turned into an array later.
+    *) 
+    let keyhash = Hashtbl.create max_cost in
+    let keys = ref [] in 
+    let addkey key = 
+      try Hashtbl.find keyhash key with Not_found -> 
+	let n = Hashtbl.length keyhash in
+	keys := key :: !keys ;
+	Hashtbl.add keyhash key n ; n
+    in 
+
+    (* Writing to the buffer. *)
+    let buf = Buffer.create 1000 in
+    let putc c = Buffer.add_char   buf c in
+    let puti i = Buffer.add_string buf (Encode7bit.to_string i) in
+    let putk k = puti (addkey k) in    
+
+    (* We save the size and starting position, because we
+       will need these to read back the leaf "seq" fields.
+    *)
+    let size = size tree in 
+    puti (size) ;
+    puti (lastseq tree - size) ;
+
+    (* Recursive function for writing down the tree. This will use 
+       up at least three bytes per leaf, which means the average leaf
+       size is about 23 bytes (when counting the SHA1 keys). As such,
+       a max-cost tree costs 64x23 = 1449 bytes.
+    *)
+    let rec write = function 
+      | Leaf l -> putc 'L' ; putk l.value 
+      | Node n -> putc 'N' ; write n.left ; write n.right
+      | Pass n -> putc 'P' ; putk n.left ; write n.right
+    in
+
+    write tree ;
+ 
+    let data = Buffer.contents buf in 
+    let keys = Array.of_list (List.rev !keys) in
+
+    Blob.make ~keys data 
+
+let log2 n = 
+  let n, s = if n lsr 16 <> 0 then n lsr 16, 16    else n, 0 in
+  let n, s = if n lsr 8  <> 0 then n lsr 8,  s + 8 else n, s in 
+  let n, s = if n lsr 4  <> 0 then n lsr 4,  s + 4 else n, s in 
+  let n, s = if n lsr 2  <> 0 then n lsr 2,  s + 2 else n, s in
+  if n lsr 1  <> 0 then s + 1 else s
     
-	  
+let of_blob blob = 
+  let keys = Blob.keys blob in 
+  let data = Blob.data blob in 
+  assert false
