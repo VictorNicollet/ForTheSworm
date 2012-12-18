@@ -138,8 +138,8 @@ let to_blob = function
     let buf = Buffer.create 1000 in
     let putc c = Buffer.add_char   buf c in
     let puti i = Buffer.add_string buf (Encode7bit.to_string i) in
-    let putk k = puti (addkey k) in    
-
+    let putk k = puti (addkey k) in   
+ 
     (* We save the size and starting position, because we
        will need these to read back the leaf "seq" fields.
     *)
