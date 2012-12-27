@@ -14,6 +14,8 @@ type 'a tree =
 
 type 'a t = 'a tree option
 
+let empty = None
+
 let ispow2 x = 
   0 = x land (x - 1)
 
