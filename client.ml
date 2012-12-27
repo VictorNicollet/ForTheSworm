@@ -22,6 +22,9 @@ let connect ~port =
   let stream = Protocol.(Response.get (CreateStream.send ~name kernel)) in
   let stream = match stream with None -> assert false | Some stream -> stream in 
 
+  Printf.printf "Created Stream %s = %s\n" 
+    (Pointer.Name.human_readable name) (Key.to_hex_short stream) ; 
+
   (* Upload some data *)
   let start_t = Unix.gettimeofday () in
   let writequeue = Queue.create () in

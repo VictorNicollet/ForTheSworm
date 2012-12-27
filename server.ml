@@ -27,6 +27,8 @@ let server = object (server)
       | `MISSING -> None
 
   method new_stream name = 
+    Log.(out AUDIT "CreateStream : %s = %s" 
+	   (Key.to_hex_short (Pointer.Name.hash name)) (Pointer.Name.human_readable name) );
     Pointer.Store.Stream.create ptrStore server ~name
 
   method del_stream key = 
