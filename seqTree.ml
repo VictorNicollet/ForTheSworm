@@ -147,7 +147,7 @@ let to_blob = function
     *)
     let size = size tree in 
     puti (size) ;
-    puti (lastseq tree - size) ;
+    puti (lastseq tree - size + 1) ;
 
     (* Recursive function for writing down the tree. This will use 
        up at least two bytes per leaf, which means the average leaf
@@ -165,6 +165,8 @@ let to_blob = function
     let data = Buffer.contents buf in 
     let keys = Array.of_list (List.rev !keys) in
 
+    Log.(out DEBUG "SeqTree OUT data = %S" data) ;
+
     Blob.make ~keys data 
 
 let log2 n = 
@@ -179,6 +181,8 @@ let of_blob blob =
   let data = Blob.data blob in 
   let m    = String.length data in 
   let kn   = Array.length keys in 
+
+  Log.(out DEBUG "SeqTree IN data = %S" data) ;
 
   if m = 0 then None else 
     
