@@ -10,4 +10,6 @@ val to_hex_short : t -> string
 
 val to_hex : t -> string
 
+val empty : t 
+
 val bytes : int
