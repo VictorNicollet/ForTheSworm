@@ -53,15 +53,15 @@ let add value tree =
   let leaf = Leaf { value ; seq = last tree + 1 } in
   match tree with None -> Some leaf | Some tree ->
     let rec add = function 
-      | Leaf _ -> node tree leaf 2 2 
-      | Node n when ispow2 n.size -> node tree leaf (n.size+1) (n.cost+1)
-      | Pass n when ispow2 n.size -> node tree leaf (n.size+1) (n.cost+1) 
+      | Leaf l -> node (Leaf l) leaf 2 2 
+      | Node n when ispow2 n.size -> node (Node n) leaf (n.size+1) (n.cost+1)
+      | Pass n when ispow2 n.size -> node (Pass n) leaf (n.size+1) (n.cost+1) 
       | Node n -> node n.left (add n.right) (n.size+1) (n.cost+1)
       | Pass n -> pass n.left (add n.right) (n.size+1) (n.cost+1)
     in
     Some (add tree) 
 
-let max_cost = 64
+let max_cost = 237
 
 let split = function
   | None -> `KEEP None
@@ -152,7 +152,7 @@ let to_blob = function
     (* Recursive function for writing down the tree. This will use 
        up at least two bytes per leaf, which means the average leaf
        size is about 22 bytes (when counting the SHA1 keys). As such,
-       a max-cost tree costs 64x22 = 1408 bytes.
+       a max-cost tree costs 237x22 = 5214 bytes.
     *)
     let rec write = function 
       | Leaf l -> putk l.value 
@@ -187,22 +187,24 @@ let of_blob blob =
   if m = 0 then None else 
     
     let pos = ref 0 in
-    let readc () = if !pos > m then raise ParseError else let c = data.[!pos] in incr pos ; c in
+    let readc () = if !pos >= m then raise ParseError else let c = data.[!pos] in incr pos ; c in
     let readi () = Encode7bit.of_charStream readc () in
     let readk () = 
       let i = readi () in
       if i < 0 || i >= kn then raise ParseError ; 
-      keys.(readi ()) 
+      keys.(i) 
     in
     
     let size  = readi () in
     let start = readi () in
+
+    Log.(out DEBUG "size = %d, start = %d" size start) ;
     
     let rec read size start = 
       if size = 1 then 
 	Leaf { value = readk () ; seq = start } 
       else 
-	let lsize  = 1 lsl (log2 size) in
+	let lsize  = if ispow2 size then size / 2 else 1 lsl (log2 size) in
 	let rsize  = size - lsize in
 	let rstart = start - lsize in
 	match readc () with 

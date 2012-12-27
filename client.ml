@@ -60,7 +60,7 @@ let connect ~port =
   let start3_t = Unix.gettimeofday () in
   while not (Queue.is_empty keys) do 
     let key = Queue.pop keys in
-    ignore (Protocol.AddEvent.send ~stream ~events:[key] kernel) ;    
+    ignore (Protocol.Response.get (Protocol.AddEvent.send ~stream ~events:[key] kernel)) ;    
   done ;   
 
   Protocol.ClientKernel.destroy kernel ;

@@ -16,7 +16,7 @@ let create store server ~name =
   let tkey = server # save_blob blob in 
   let data = Key.to_bytes tkey in 
   if Store.create store key ~meta ~data then begin 
-    Log.(out AUDIT "%s -> %s [0,name=%s]"
+    Log.(out AUDIT "%s -> %s (%s)"
 	   (Key.to_hex_short key) (Key.to_hex_short tkey) (Name.human_readable name)) ;
     Some key 
   end else None
@@ -47,6 +47,8 @@ let add store server key events =
     (* Grab the current tree *)
     match server # load_blob ckey with None -> missing ckey | Some blob -> 
       let tree = SeqTree.of_blob blob in 
+
+      Log.(out DEBUG "Tree loaded, last = %d" (SeqTree.last tree)) ;
     
       (* Append the events to the tree, generating a new tree *)
       let tree = List.fold_left (fun tree event -> SeqTree.add event tree) tree events in 
