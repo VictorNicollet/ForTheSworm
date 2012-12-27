@@ -18,7 +18,6 @@ let send kernel ~key =
 module Server = struct
 
   let handle ~key s wf = 
-    Log.(out AUDIT "Load : %s" (Key.to_hex_short key)) ;   
     ignore (Thread.create begin fun key -> 
       match s # load_blob key with
       | None      -> wf (fun w -> w # int 0)
