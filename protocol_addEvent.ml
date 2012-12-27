@@ -1,11 +1,12 @@
 open Protocol_types 
 open Protocol_clientKernel
 
-let key = '+'
+let keyword = '+'
 
 let send kernel ~stream ~events = 
   enqueue kernel 
     ~send:begin fun w ->
+      w # char keyword ; 
       w # key stream ; 
       w # int (List.length events) ;
       List.iter (w # key) events ;
@@ -40,4 +41,4 @@ module Server = struct
       
 end
 
-let endpoint = key, Server.parse
+let endpoint = keyword, Server.parse
