@@ -20,6 +20,9 @@ let create store server ~name =
 let add store server key events = 
 
   let rec save_tree tree = 
+    (* Split the tree as many times as necessary (could be a lot, 
+       if many events were appended), writing each atomic subtree to the 
+       blob store. *)
     match SeqTree.split tree with 
       | `KEEP t -> let blob = SeqTree.to_blob tree in 
 		   server # save_blob blob 
@@ -28,10 +31,17 @@ let add store server key events =
 				save_tree right
   in
 
+  let missing ckey = 
+    Log.(out ERROR "Stream tree lost : %s -> %s" 
+	   (Key.to_hex_short key) 
+	   (Key.to_hex_short ckey)) ;
+    `MISSING
+  in
+
   let rec attempt ckey = 
 
     (* Grab the current tree *)
-    match server # load_blob ckey with None -> `MISSING | Some blob -> 
+    match server # load_blob ckey with None -> missing ckey | Some blob -> 
       let tree = SeqTree.of_blob blob in 
     
       (* Append the events to the tree, generating a new tree *)
@@ -52,18 +62,32 @@ let add store server key events =
 
       (* Retry if a conflict happens *)
       match result with 
-	| Some (`OK version)     -> `OK version
+	| Some (`OK version) -> `OK version
 	| Some (`CONFLICT ckey') -> attempt ckey'
-	| None                   -> `MISSING
+	| None -> Log.(out AUDIT "Stream pointer disappeared : %s" (Key.to_hex_short key)) ; `MISSING
   in
 
   (* Determine the current stored pointer *)
   match Store.load store key Key.of_channel with 
     | Some ckey -> attempt ckey
-    | None -> `MISSING
+    | None -> Log.(out AUDIT "Stream pointer not found : %s" (Key.to_hex_short key)) ; `MISSING
+
+exception MissingSubTree
 
 let load store server key ~start ~count = 
-  None
+  
+  let count = if start < 0 then count + start else count in 
+  let start = if start < 0 then 0 else start in
+
+  let rec explore tkey b e =
+    raise MissingSubTree
+  in
+
+  (* Load the root, start searching *)
+  match Store.load store key Key.of_channel with 
+    | None -> Log.(out AUDIT "Stream pointer not found : %s" (Key.to_hex_short key)) ; None
+    | Some tkey -> if count < 1 then Some [] else try explore tkey start (start + count) with 
+	| MissingSubTree -> None
 
 let delete store key = 
   () 
