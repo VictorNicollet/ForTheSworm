@@ -13,7 +13,7 @@ let server = object (server)
   method save_blob data = 
     let key = Blob.hash data in 
     Log.(out AUDIT "SaveBlob : %s (%d bytes)" (Key.to_hex_short key) (Blob.bytes data)) ;   
-    if key = empty then Key.empty else 
+    if key = empty then empty else 
       Blob.Store.save blobStore data
 
   method load_blob key = 

@@ -15,7 +15,11 @@ let create store server ~name =
   let blob = SeqTree.to_blob tree in 
   let tkey = server # save_blob blob in 
   let data = Key.to_bytes tkey in 
-  if Store.create store key ~meta ~data then Some key else None
+  if Store.create store key ~meta ~data then begin 
+    Log.(out AUDIT "%s -> %s [0,name=%s]"
+	   (Key.to_hex_short key) (Key.to_hex_short tkey) (Name.human_readable name)) ;
+    Some key 
+  end else None
 
 let add store server key events = 
 
@@ -55,16 +59,23 @@ let add store server key events =
       let result = Store.access store key (fun ~meta chan -> 
 	let ckey' = Key.of_channel chan in 
 	if ckey = ckey' then 
-	  `OK version, Some (Key.to_bytes nkey) 
+	  `OK (version,nkey), Some (Key.to_bytes nkey) 
 	else
 	  `CONFLICT ckey', None
       ) in
 
       (* Retry if a conflict happens *)
       match result with 
-	| Some (`OK version) -> `OK version
+	| Some (`OK (version,nkey)) -> begin
+	  Log.(out AUDIT "%s -> %s [%d]"
+		 (Key.to_hex_short key) (Key.to_hex_short nkey) version) ;
+	  `OK version
+	end
 	| Some (`CONFLICT ckey') -> attempt ckey'
-	| None -> Log.(out AUDIT "Stream pointer disappeared : %s" (Key.to_hex_short key)) ; `MISSING
+	| None -> begin 
+	  Log.(out AUDIT "Stream pointer disappeared : %s" (Key.to_hex_short key)) ; 
+	  `MISSING
+	end
   in
 
   (* Determine the current stored pointer *)
