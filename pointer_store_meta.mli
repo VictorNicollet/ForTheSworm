@@ -1,4 +1,4 @@
-type kind = [`RAW]
+type kind = [`RAW|`STREAM]
 
 type t = { kind : kind ; name : Pointer_name.t }
 

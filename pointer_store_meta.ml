@@ -1,4 +1,4 @@
-type kind = [`RAW]
+type kind = [`RAW|`STREAM]
 
 module Name = Pointer_name 
 
@@ -9,10 +9,12 @@ module Kind = struct
   exception Unknown of char
             
   let to_char = function 
-    | `RAW -> 'R'
+    | `RAW    -> 'R'
+    | `STREAM -> 'S'
       
   let of_char = function 
     | 'R' -> `RAW
+    | 'S' -> `STREAM 
     |  c  -> raise (Unknown c)
 
 end
