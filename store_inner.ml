@@ -17,13 +17,13 @@ let load store key ?meta callback =
 let find store key = 
   None <> load store key ignore
 
-let save store key ?meta callback = 
+let save store key ?meta ?(overwrite=false) callback = 
   let filename = filename ?meta store key in
   let dirname  = Filename.dirname filename in  
   let dirname' = Filename.dirname dirname in 
   (try ignore (Sys.is_directory dirname') with _ -> Unix.mkdir dirname' 0o700) ;
   (try ignore (Sys.is_directory dirname ) with _ -> Unix.mkdir dirname  0o700) ;
-  if not (Sys.file_exists filename) then 
+  if overwrite || not (Sys.file_exists filename) then 
     let chan = open_out_bin filename in 
     ( try callback chan ; close_out chan with exn -> close_out chan ; raise exn )
       

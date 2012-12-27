@@ -86,7 +86,7 @@ let access store key callback =
       match processed with 
 	| None                -> None
 	| Some (r, None)      -> Some r
-	| Some (r, Some data) -> let () = Inner.save store key (write data) in
+	| Some (r, Some data) -> let () = Inner.save store key ~overwrite:true(write data) in
 				 Some r
 
     end)
