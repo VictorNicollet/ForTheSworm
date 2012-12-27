@@ -11,7 +11,9 @@ let send kernel ~stream ~events =
       List.iter (w # key) events ;
     end
     ~recv:begin fun r -> 
-      r # int
+      match r # int with 
+	| 0 -> None
+	| n -> Some (n-1) 
     end
     
 module Server = struct
@@ -22,7 +24,9 @@ module Server = struct
     ) events ;   
     ignore (Thread.create begin fun (stream,events) ->  
       let version = s # add_events stream events in
-      wf (fun w -> w # int version) 
+      wf (fun w -> match version with 
+	| None   -> w # int 0
+	| Some v -> w # int (v + 1))
     end (stream,events)) 
       
   let parse r =

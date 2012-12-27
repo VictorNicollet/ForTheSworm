@@ -2,7 +2,7 @@ type server = <
   save_blob  : Blob.t -> Key.t ;
   load_blob  : Key.t  -> Blob.t option ;
   new_stream : Pointer.Name.t -> Key.t option ;  
-  add_events : Key.t  -> Key.t list -> int ;
+  add_events : Key.t  -> Key.t list -> int option ;
   del_stream : Key.t  -> unit ; 
 >
 

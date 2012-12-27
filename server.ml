@@ -19,7 +19,7 @@ let server = object
       None
 
   method add_events key events = 
-    List.length events
+    None
 
   method new_stream name = 
     None
