@@ -74,19 +74,32 @@ let add store server key events =
 
 exception MissingSubTree
 
+type loadtree = (Key.t * int * int) list list 
+
 let load store server key ~start ~count = 
   
   let count = if start < 0 then count + start else count in 
   let start = if start < 0 then 0 else start in
 
-  let rec explore tkey b e =
-    raise MissingSubTree
+  let rec explore acc = function 
+    | [] -> List.concat acc
+    | [] :: l -> explore acc l 
+    | ((k,b,e) :: t1) :: t2 -> 
+      match server # load_blob k with 
+	| None -> Log.(out ERROR "Stream tree list : %s -> [..] -> %s" 
+			 (Key.to_hex_short key) (Key.to_hex_short k)) ; raise MissingSubTree
+	| Some blob -> let tree = SeqTree.of_blob blob in 
+		       let sub, seq = SeqTree.range tree b e in
+		       explore (seq :: acc) (List.rev sub :: t1 :: t2)
   in
+
+  let b = start in
+  let e = start + count in 
 
   (* Load the root, start searching *)
   match Store.load store key Key.of_channel with 
     | None -> Log.(out AUDIT "Stream pointer not found : %s" (Key.to_hex_short key)) ; None
-    | Some tkey -> if count < 1 then Some [] else try explore tkey start (start + count) with 
+    | Some k -> if count < 1 then Some [] else try Some (explore [] [[k,b,e]]) with 
 	| MissingSubTree -> None
 
 let delete store key = 

@@ -93,7 +93,7 @@ let range tree b e =
   match tree with None -> [], [] | Some tree ->
     let rec aux b e refA valA = 
       if b >= e then fun _ -> (refA,valA) else function 
-        | Leaf l -> (refA,(l.value,l.seq) :: valA) 
+        | Leaf l -> (refA,l.value :: valA) 
 	| Node n -> auxnode b e refA valA n
 	| Pass n -> auxpass b e refA valA n
     and auxnode b e refA valA n =

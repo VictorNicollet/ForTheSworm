@@ -5,7 +5,7 @@ val add  : 'a -> 'a t -> 'a t
 
 val split : 'a t -> [ `KEEP of 'a t | `SPLIT of 'a t * (Key.t -> 'a t) ] 
 
-val range : 'a t -> int -> int -> (Key.t * int * int) list * ('a * int) list
+val range : 'a t -> int -> int -> (Key.t * int * int) list * 'a list
 
 val empty : 'a t 
 
