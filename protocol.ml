@@ -9,12 +9,14 @@ module Handshake = Protocol_handshake
 module SaveBlob = Protocol_saveBlob
 module LoadBlob = Protocol_loadBlob
 module AddEvent = Protocol_addEvent
+module CreateStream = Protocol_createStream
 
 let endpoints : endpoint list = [
   Handshake.endpoint ;
   SaveBlob.endpoint ;
   LoadBlob.endpoint ;
-  AddEvent.endpoint ; 
+  AddEvent.endpoint ;
+  CreateStream.endpoint ; 
 ]
 
 let parseNextRequest stream server =

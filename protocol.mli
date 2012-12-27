@@ -34,5 +34,9 @@ module LoadBlob : sig
 end
 
 module AddEvent : sig
-  val send : Protocol_clientKernel.t -> stream:Key.t -> events:Key.t list -> int option Protocol_response.t
+  val send : ClientKernel.t -> stream:Key.t -> events:Key.t list -> int option Protocol_response.t
+end
+
+module CreateStream : sig
+  val send : ClientKernel.t -> name:Pointer.Name.t -> Key.t option Response.t
 end

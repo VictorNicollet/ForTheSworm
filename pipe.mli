@@ -6,7 +6,7 @@ class read : socket -> object
   method char    : char
   method int     : int
   method string  : int -> string
-  method key     :  Key.t
+  method key     : Key.t
   method count   : int
 end
 
