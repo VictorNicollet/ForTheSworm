@@ -17,6 +17,11 @@ let connect ~port =
   let version = Protocol.Response.get result in
   Printf.printf "Version: %d\n" version ; 
 
+  (* Create an event stream pointer *)
+  let name = Pointer.Name.make [ `S "test" ] in
+  let stream = Protocol.(Response.get (CreateStream.send ~name kernel)) in
+  let stream = match stream with None -> assert false | Some stream -> stream in 
+
   (* Upload some data *)
   let start_t = Unix.gettimeofday () in
   let writequeue = Queue.create () in
@@ -30,8 +35,10 @@ let connect ~port =
   (* Read back the written data *)
   let start2_t = Unix.gettimeofday () in
   let readqueue = Queue.create () in
+  let keys = Queue.create () in
   while not (Queue.is_empty writequeue) do 
     let key = Protocol.Response.get (Queue.pop writequeue) in
+    Queue.push key keys ;
     Queue.push (Protocol.LoadBlob.send ~key kernel) readqueue
   done ;
 
@@ -46,6 +53,13 @@ let connect ~port =
 
   Printf.printf "Read : %fs (%d errors)\n" (Unix.gettimeofday () -. start2_t) !e;
   
+  (* Append all the events to the stream *)
+  let start3_t = Unix.gettimeofday () in
+  while not (Queue.is_empty keys) do 
+    let key = Queue.pop keys in
+    ignore (Protocol.AddEvent.send ~stream ~events:[key] kernel) ;    
+  done ;   
+
   Protocol.ClientKernel.destroy kernel ;
 
   let end_t = Unix.gettimeofday () in
