@@ -24,7 +24,10 @@ let parseNextRequest stream server =
   let w = stream # write in 
   let i = r # int  in 
   let c = r # char in
-  let endpoint = List.assoc c endpoints in
+  let endpoint = 
+    try List.assoc c endpoints 
+    with Not_found -> Log.(out AUDIT "Received unknown command '%c'" c) ; raise Not_found
+  in
   endpoint r server begin fun callback -> 
     Mtx.use (w # lock) (lazy (
       w # int i ;
