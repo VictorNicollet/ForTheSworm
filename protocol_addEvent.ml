@@ -20,9 +20,6 @@ let send kernel ~stream ~events =
 module Server = struct
 
   let handle ~stream ~events s wf =
-    List.iter (fun event -> 
-      Log.(out AUDIT "AddEvent : %s <- %s" (Key.to_hex_short stream) (Key.to_hex_short event))
-    ) events ;   
     ignore (Thread.create begin fun (stream,events) ->  
       let version = s # add_events stream events in
       wf (fun w -> match version with 

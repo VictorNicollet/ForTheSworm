@@ -9,10 +9,13 @@ let ptrStore  = Pointer.Store.define store
 let server = object (server)
 
   method save_blob data = 
-    if Blob.hash data = Key.empty then Key.empty else 
+    let key = Blob.hash data in 
+    Log.(out AUDIT "SaveBlob : %s (%d bytes)" (Key.to_hex_short key) (Blob.bytes data)) ;   
+    if key = Key.empty then Key.empty else 
       Blob.Store.save blobStore data
 
   method load_blob key = 
+    Log.(out AUDIT "LoadBlob : %s" (Key.to_hex_short key)) ;
     if key = Key.empty then Some (Blob.make "") else 
       try Blob.Store.load blobStore key 
       with exn -> 
@@ -22,6 +25,9 @@ let server = object (server)
 	None
 	  
   method add_events key events = 
+    List.iter (fun event -> 
+      Log.(out AUDIT "AddEvent : %s <- %s" (Key.to_hex_short key) (Key.to_hex_short event))
+    ) events ;   
     match Pointer.Store.Stream.add ptrStore server key events with 
       | `OK version -> Some version
       | `MISSING -> None
