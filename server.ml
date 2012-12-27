@@ -18,6 +18,9 @@ let server = object
 	     (Printexc.to_string exn)) ;
       None
 
+  method add_events key events = 
+    List.length events
+
 end
 
 let handler iaddr pipe = 

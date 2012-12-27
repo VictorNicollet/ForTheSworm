@@ -1,6 +1,7 @@
 type server = <
-  save_blob : Blob.t -> Key.t ;
-  load_blob : Key.t  -> Blob.t option ; 
+  save_blob  : Blob.t -> Key.t ;
+  load_blob  : Key.t  -> Blob.t option ;
+  add_events : Key.t  -> Key.t list -> int ; 
 >
 
 val version : int
@@ -28,4 +29,8 @@ end
 
 module LoadBlob : sig
   val send : ClientKernel.t -> key:Key.t -> Blob.t option Response.t
+end
+
+module AddEvent : sig
+  val send : Protocol_clientKernel.t -> stream:Key.t -> events:Key.t list -> int Protocol_response.t
 end
