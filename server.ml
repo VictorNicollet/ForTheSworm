@@ -4,8 +4,9 @@ open Pointer
 
 let store = "store"
 let blobStore = Blob.Store.define store
+let ptrStore  = Pointer.Store.define store
 
-let server = object
+let server = object (server)
 
   method save_blob data = 
     Blob.Store.save blobStore data
@@ -19,13 +20,15 @@ let server = object
       None
 
   method add_events key events = 
-    None
+    match Pointer.Store.Stream.add ptrStore server key events with 
+      | `OK version -> Some version
+      | `MISSING -> None
 
   method new_stream name = 
-    None
+    Pointer.Store.Stream.create ptrStore server ~name
 
   method del_stream key = 
-    () 
+    Pointer.Store.Stream.delete ptrStore key 
 
 end
 
