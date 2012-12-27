@@ -21,6 +21,12 @@ let server = object
   method add_events key events = 
     List.length events
 
+  method new_stream name = 
+    None
+
+  method del_stream key = 
+    () 
+
 end
 
 let handler iaddr pipe = 
