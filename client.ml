@@ -58,11 +58,23 @@ let connect ~port =
   
   (* Append all the events to the stream *)
   let start3_t = Unix.gettimeofday () in
+  let backqueue = Queue.create () in
   while not (Queue.is_empty keys) do 
     let key = Queue.pop keys in
-    ignore (Protocol.Response.get (Protocol.AddEvent.send ~stream ~events:[key] kernel)) ;    
-  done ;   
+    Queue.push (Protocol.AddEvent.send ~stream ~events:[key] kernel) backqueue ;    
+  done ;
 
+  Printf.printf "AddEvent : %fs\n" (Unix.gettimeofday () -. start3_t);   
+
+  (* Read back the responses *)
+  let start4_t = Unix.gettimeofday () in
+  while not (Queue.is_empty backqueue) do 
+    let _ = Protocol.Response.get (Queue.pop backqueue) in
+    ()
+  done ;
+
+  Printf.printf "Confirm : %fs\n" (Unix.gettimeofday () -. start4_t);   
+  
   Protocol.ClientKernel.destroy kernel ;
 
   let end_t = Unix.gettimeofday () in
