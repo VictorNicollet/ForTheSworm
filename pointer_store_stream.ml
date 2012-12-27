@@ -74,13 +74,15 @@ let add store server key events =
 
 exception MissingSubTree
 
-type loadtree = (Key.t * int * int) list list 
-
 let load store server key ~start ~count = 
   
   let count = if start < 0 then count + start else count in 
   let start = if start < 0 then 0 else start in
 
+  (* This function performs a depth-first, latest-to-oldest traversal of the 
+     seqTree, filtered to only return leaves within a range (see SeqTree.range), 
+     using its first parameter as a result accumulator and its second parameter
+     as the execution stack (to be tail-recursive). *)
   let rec explore acc = function 
     | [] -> List.concat acc
     | [] :: l -> explore acc l 
