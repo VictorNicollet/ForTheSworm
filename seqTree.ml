@@ -150,12 +150,12 @@ let to_blob = function
     puti (lastseq tree - size) ;
 
     (* Recursive function for writing down the tree. This will use 
-       up at least three bytes per leaf, which means the average leaf
-       size is about 23 bytes (when counting the SHA1 keys). As such,
-       a max-cost tree costs 64x23 = 1449 bytes.
+       up at least two bytes per leaf, which means the average leaf
+       size is about 22 bytes (when counting the SHA1 keys). As such,
+       a max-cost tree costs 64x22 = 1408 bytes.
     *)
     let rec write = function 
-      | Leaf l -> putc 'L' ; putk l.value 
+      | Leaf l -> putk l.value 
       | Node n -> putc 'N' ; write n.left ; write n.right
       | Pass n -> putc 'P' ; putk n.left ; write n.right
     in
@@ -177,4 +177,40 @@ let log2 n =
 let of_blob blob = 
   let keys = Blob.keys blob in 
   let data = Blob.data blob in 
-  assert false
+  let m    = String.length data in 
+  let kn   = Array.length keys in 
+
+  if m = 0 then None else 
+    
+    let pos = ref 0 in
+    let readc () = if !pos > m then raise ParseError else let c = data.[!pos] in incr pos ; c in
+    let readi () = Encode7bit.of_charStream readc () in
+    let readk () = 
+      let i = readi () in
+      if i < 0 || i >= kn then raise ParseError ; 
+      keys.(readi ()) 
+    in
+    
+    let size  = readi () in
+    let start = readi () in
+    
+    let rec read size start = 
+      if size = 1 then 
+	Leaf { value = readk () ; seq = start } 
+      else 
+	let lsize  = 1 lsl (log2 size) in
+	let rsize  = size - lsize in
+	let rstart = start - lsize in
+	match readc () with 
+	  | 'N' -> let l = read lsize start in
+		   let r = read rsize rstart in
+		   node l r size (cost l + cost l) 
+	  | 'P' -> let k = readk () in
+		   let r = read rsize rstart in
+		   pass k r size (cost r) 
+	  |  _  -> raise ParseError
+	  
+    in
+    
+    Some (read size start) 
+      
