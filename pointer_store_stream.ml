@@ -105,4 +105,4 @@ let load store server key ~start ~count =
 	| MissingSubTree -> None
 
 let delete store key = 
-  () 
+  Store.delete store key  
