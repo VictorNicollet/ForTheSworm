@@ -59,7 +59,7 @@ let delete store key =
 let create store key ~data ~meta = 
   writelocked store key 
     (lazy begin 
-      if find store key then false else begin 
+      if Inner.find store key then false else begin 
 	Inner.save store key ~meta:true (write meta) ;
 	Inner.save store key (write data) ;
 	true

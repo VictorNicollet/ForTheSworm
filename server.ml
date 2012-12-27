@@ -6,17 +6,19 @@ let store = "store"
 let blobStore = Blob.Store.define store
 let ptrStore  = Pointer.Store.define store
 
+let empty  = Blob.hash (Blob.make "") 
+
 let server = object (server)
 
   method save_blob data = 
     let key = Blob.hash data in 
     Log.(out AUDIT "SaveBlob : %s (%d bytes)" (Key.to_hex_short key) (Blob.bytes data)) ;   
-    if key = Key.empty then Key.empty else 
+    if key = empty then Key.empty else 
       Blob.Store.save blobStore data
 
   method load_blob key = 
     Log.(out AUDIT "LoadBlob : %s" (Key.to_hex_short key)) ;
-    if key = Key.empty then Some (Blob.make "") else 
+    if key = empty then Some (Blob.make "") else 
       try Blob.Store.load blobStore key 
       with exn -> 
 	Log.(out ERROR "Load blob %s failed : %S" 
