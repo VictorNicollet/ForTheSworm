@@ -165,8 +165,6 @@ let to_blob = function
     let data = Buffer.contents buf in 
     let keys = Array.of_list (List.rev !keys) in
 
-    Log.(out DEBUG "SeqTree OUT data = %S" data) ;
-
     Blob.make ~keys data 
 
 let log2 n = 
@@ -182,8 +180,6 @@ let of_blob blob =
   let m    = String.length data in 
   let kn   = Array.length keys in 
 
-  Log.(out DEBUG "SeqTree IN data = %S" data) ;
-
   if m = 0 then None else 
     
     let pos = ref 0 in
@@ -197,8 +193,6 @@ let of_blob blob =
     
     let size  = readi () in
     let start = readi () in
-
-    Log.(out DEBUG "size = %d, start = %d" size start) ;
     
     let rec read size start = 
       if size = 1 then 
