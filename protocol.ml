@@ -10,6 +10,7 @@ module SaveBlob = Protocol_saveBlob
 module LoadBlob = Protocol_loadBlob
 module AddEvent = Protocol_addEvent
 module CreateStream = Protocol_createStream
+module GetEvents = Protocol_getEvents
 
 let endpoints : endpoint list = [
   Handshake.endpoint ;
@@ -17,6 +18,7 @@ let endpoints : endpoint list = [
   LoadBlob.endpoint ;
   AddEvent.endpoint ;
   CreateStream.endpoint ; 
+  GetEvents.endpoint ;
 ]
 
 let parseNextRequest stream server =

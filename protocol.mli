@@ -38,6 +38,10 @@ module AddEvent : sig
   val send : ClientKernel.t -> stream:Key.t -> events:Key.t list -> int option Response.t
 end
 
+module GetEvents : sig
+  val send : ClientKernel.t -> stream:Key.t -> start:int -> count:int -> Key.t list option Response.t
+end
+
 module CreateStream : sig
   val send : ClientKernel.t -> name:Pointer.Name.t -> Key.t option Response.t
 end
