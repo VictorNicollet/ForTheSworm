@@ -42,6 +42,10 @@ let server = object (server)
   method del_stream key = 
     Pointer.Store.Stream.delete ptrStore key 
 
+  method get_events key start count = 
+    Log.(out AUDIT "GetEvents : %s %d-%d" (Key.to_hex_short key) start (start + count)) ;
+    Pointer.Store.Stream.load ptrStore server ~start ~count key
+
 end
 
 let handler iaddr pipe = 
