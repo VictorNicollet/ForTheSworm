@@ -47,8 +47,6 @@ let add store server key events =
     (* Grab the current tree *)
     match server # load_blob ckey with None -> missing ckey | Some blob -> 
       let tree = SeqTree.of_blob blob in 
-
-      Log.(out DEBUG "Tree loaded, last = %d" (SeqTree.last tree)) ;
     
       (* Append the events to the tree, generating a new tree *)
       let tree = List.fold_left (fun tree event -> SeqTree.add event tree) tree events in 
