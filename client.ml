@@ -19,8 +19,8 @@ let connect ~port =
 
   (* Create an event stream pointer *)
   let name = Pointer.Name.make [ `S "test" ] in
-  let stream = Protocol.(Response.get (CreateStream.send ~name kernel)) in
-  let stream = match stream with None -> assert false | Some stream -> stream in 
+  let _    = Protocol.(Response.get (CreateStream.send ~name kernel)) in
+  let stream = Pointer.Name.hash name in
 
   Printf.printf "Created Stream %s = %s\n" 
     (Pointer.Name.human_readable name) (Key.to_hex_short stream) ; 
@@ -65,7 +65,7 @@ let connect ~port =
   done ;
 
   Printf.printf "AddEvent : %fs\n" (Unix.gettimeofday () -. start3_t);   
-
+  (*
   (* Read back the responses *)
   let start4_t = Unix.gettimeofday () in
   while not (Queue.is_empty backqueue) do 
@@ -74,7 +74,7 @@ let connect ~port =
   done ;
 
   Printf.printf "Confirm : %fs\n" (Unix.gettimeofday () -. start4_t);   
-  
+  *)
   Protocol.ClientKernel.destroy kernel ;
 
   let end_t = Unix.gettimeofday () in
@@ -83,9 +83,9 @@ let connect ~port =
   Printf.printf "Time : %fs, Read : %f KB/s, Write : %f KB/s\n"
     delta 
     (float_of_int (pipe # read # count) /. 1024. /. delta) 
-    (float_of_int (pipe # write # count) /. 1024. /. delta) ;
+    (float_of_int (pipe # write # count) /. 1024. /. delta) 
     
-  Unix.(shutdown sock SHUTDOWN_ALL) 
+
 
 let () = connect ~port:4567
 
