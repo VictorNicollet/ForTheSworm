@@ -58,13 +58,23 @@ let connect ~port =
   
   (* Append all the events to the stream *)
   let start3_t = Unix.gettimeofday () in
-  let backqueue = Queue.create () in
+  let block    = 200 in
+  let queries  = ref 0 in
+  let buffer   = ref [] in
   while not (Queue.is_empty keys) do 
     let key = Queue.pop keys in
-    Queue.push (Protocol.AddEvent.send ~stream ~events:[key] kernel) backqueue ;    
+    buffer := key :: !buffer ;
+    if List.length !buffer = block || Queue.is_empty keys then begin
+      let events = List.rev !buffer in      
+      let result = Protocol.AddEvent.send ~stream ~events kernel in
+      ignore (Protocol.Response.get result) ; 
+      incr queries ; 
+      buffer := []
+    end 
   done ;
 
-  Printf.printf "AddEvent : %fs\n" (Unix.gettimeofday () -. start3_t);   
+  let d = Unix.gettimeofday () -. start3_t in
+  Printf.printf "AddEvent : %fs (%fs/query)\n" d (d /. float_of_int (!queries)) ;   
   (*
   (* Read back the responses *)
   let start4_t = Unix.gettimeofday () in
