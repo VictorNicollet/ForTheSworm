@@ -1,11 +1,13 @@
 type 'a t = {
   mutable tbl : 'a option array ;
-  mutable free : int list 
+  mutable free : int list ;
+  mutable size : int ; 
 }
 
 let make () = {
   tbl  = [| None ; None ; None ; None |] ;
-  free = [ 0 ; 1 ; 2 ; 3 ]
+  free = [ 0 ; 1 ; 2 ; 3 ] ;
+  size = 0 ;
 }
 
 let enlarge t = 
@@ -21,13 +23,20 @@ let add t x =
   match t.free with [] -> assert false | i :: free ->
     t.tbl.(i) <- Some x ;
     t.free <- free ;
+    t.size <- t.size + 1 ; 
     i
 
 let remove t i = 
   let y = t.tbl.(i) in
   t.tbl.(i) <- None ;
-  if y <> None then t.free <- i :: t.free ;
+  if y <> None then begin 
+    t.free <- i :: t.free ;
+    t.size <- t.size - 1
+  end ; 
   y
+
+let size t = 
+  t.size
 
 let clear t f = 
   Array.iter (function 

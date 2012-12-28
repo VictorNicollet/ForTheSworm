@@ -32,4 +32,7 @@ let enqueue t ~send ~recv =
   response
   
 let destroy t =
-  PendArray.clear t.pending (fun f -> f None) 
+  while PendArray.size t.pending > 0 do 
+    attempt t () 
+  done ;
+
